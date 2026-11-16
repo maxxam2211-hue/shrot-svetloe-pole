@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maxxam2211-hue.github.io/shrot-svetloe-pole/sitemap.xml
