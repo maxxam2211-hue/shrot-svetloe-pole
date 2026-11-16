@@ -199,6 +199,15 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-bet
 .sticky a{flex:1;justify-content:center;box-shadow:0 14px 30px -10px rgba(0,0,0,.5)}
 @media(max-width:700px){.sticky{display:flex}body{padding-bottom:78px}}
 
+/* theme animation: sun rays + falling pellets */
+.rays{position:absolute;inset:-22%;border-radius:50%;background:repeating-conic-gradient(rgba(246,180,0,.34) 0 5deg,transparent 5deg 15deg);-webkit-mask-image:radial-gradient(circle,#000 30%,transparent 68%);mask-image:radial-gradient(circle,#000 30%,transparent 68%);animation:spin 50s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sunball{animation:float 7s ease-in-out infinite,pulse 4.5s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 160px 36px rgba(246,180,0,.6)}}
+.rain{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.rain i{position:absolute;top:-30px;border-radius:6px;background:linear-gradient(#a7764a,#6b4326);box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);animation:fall linear infinite;will-change:transform}
+@keyframes fall{to{transform:translateY(115vh) rotate(420deg)}}
+
 /* reveal */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
@@ -226,6 +235,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-bet
 <main id="top">
 
 <section class="hero" aria-labelledby="h1">
+ <div class="rain" id="rain" aria-hidden="true"></div>
  <div class="wrap hero-grid">
   <div>
    <div class="eyebrow">Производитель кормов · Самара</div>
@@ -238,6 +248,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-bet
    <div class="chips"><span class="chip">до 36 % протеина</span><span class="chip">100 % растительное сырьё</span><span class="chip">без ГМО</span><span class="chip">доставка по РФ</span></div>
   </div>
   <div class="hero-art" aria-hidden="true">
+   <div class="rays"></div>
    <div class="sunball"></div>
    <div class="pellets">
     <i style="left:8%;top:22%;transform:rotate(-20deg);animation-delay:-1s"></i>
@@ -264,7 +275,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-bet
   <div class="bento">
    <article class="tile t-big rv">
     <h3>Высокобелковая добавка в рацион</h3>
-    <div class="num">36%</div>
+    <div class="num" id="cnt" data-count="36">36%</div>
     <p>Зимой, когда нет зелёного корма, рацион часто «проседает» по протеину. Гранулированный шрот закрывает этот дефицит — меньше потерь в привесе, надоях и яйценоскости.</p>
    </article>
    <article class="tile t-2 rv"><span class="ic">🌱</span><h3>100 % растительное сырьё</h3><p>Натуральный продукт переработки семян подсолнечника, без ГМО.</p></article>
@@ -403,6 +414,17 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-bet
 // reveal
 const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});
 document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*70+'ms';io.observe(el)});
+// falling pellets in hero + counter (skipped with reduced motion)
+const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!calm){
+ const rain=document.getElementById('rain');
+ for(let i=0;i<14;i++){const p=document.createElement('i');const w=14+Math.random()*14;
+  p.style.cssText='left:'+(Math.random()*100)+'%;width:'+w+'px;height:'+(w*.42)+'px;opacity:'+(.25+Math.random()*.35)+';animation-duration:'+(11+Math.random()*12)+'s;animation-delay:-'+(Math.random()*20)+'s';
+  rain.appendChild(p)}
+ const c=document.getElementById('cnt');
+ new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();const to=+c.dataset.count,t0=performance.now();
+  (function step(n){const k=Math.min((n-t0)/1400,1);c.textContent=Math.round(to*(1-Math.pow(1-k,3)))+'%';if(k<1)requestAnimationFrame(step)})(t0)}},{threshold:.5}).observe(c);
+}
 // calc
 const t=document.getElementById('tons');
 function calc(){const v=+t.value;document.getElementById('tout').textContent=v+' т';
